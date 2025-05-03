@@ -1,0 +1,12 @@
+(library
+ (name IStd)
+ (public_name ocaml-func.istd)
+ (libraries core)
+ (modules iStd))
+
+(env
+ (dev
+  (flags
+   (:standard -warn-error -A)))
+ (release
+  (ocamlopt_flags :standard -ccopt -static)))

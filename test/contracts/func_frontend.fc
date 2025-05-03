@@ -1,0 +1,170 @@
+#pragma version >=0.4.0;
+#pragma version =0.4.4;
+#pragma allow-post-modification;
+#pragma compute-asm-ltr;
+#include "sample_SubscriptionBatch.headers.fc";
+
+global (int, slice, int, slice) __tact_context;
+global slice __tact_context_sender;
+global cell __tact_context_sys;
+global int __tact_randomized;
+
+const MIN_STORAGE_DURATION = 5 * 365 * 24 * 3600; ;; 5 years
+
+const int op::send = "send"c;
+
+() var_decls() inline {
+    int b;
+    var h = address.preload_uint(11);
+    var [int balance, _] = get_balance();
+    (int wc, _) = parse_std_addr(addr);
+    int x = 2;
+    var x = 2;
+    (int, int) p = (1, 2);
+    (int, var) p = (1, 2);
+    (int, int, int) (x, y, z) = (1, 2, 3);
+    (int x, int y, int z) = (1, 2, 3);
+    var (x, y, z) = (1, 2, 3);
+    (int x = 1, int y = 2, int z = 3);
+    [int, int, int] [x, y, z] = [1, 2, 3];
+    [int x, int y, int z] = [1, 2, 3];
+    var [x, y, z] = [1, 2, 3];
+    int flags = cs~load_uint(4);
+
+    ;; not vardecls
+    (a, b, c) = value.unpack();
+}
+
+(slice) convert_to_slice(int value) impure {
+  return slice dict_value = begin_cell()
+    .store_uint(value, 32)
+    .end_cell().begin_parse();
+}
+
+;; __tact_verify_address
+slice __tact_verify_address(slice address) inline;
+;; __tact_load_address
+(slice, slice) __tact_load_address(slice cs) inline;
+
+slice __tact_verify_address(slice address) inline {
+    {-
+    some comment
+    -}
+    throw_unless(136, address.slice_bits() == 267);
+    var h = address.preload_uint(11);
+    throw_if(137, h == 1279);
+    throw_unless(136, h == 1024);
+    return address;
+}
+
+builder __tact_store_address(builder b, slice address) inline {
+    return b.store_slice(__tact_verify_address(address));
+}
+
+int __tact_my_balance() inline {
+    return pair_first(get_balance());
+}
+
+(int, slice, int, slice) __tact_context_get() inline {
+    return __tact_context;
+}
+
+slice __tact_context_get_sender() inline {
+    return __tact_context_sender;
+}
+
+builder __tact_store_bool(builder b, int v) inline {
+    return b.store_int(v, 1);
+}
+
+() $global_send((int, slice, int, int, cell, cell, cell) $params) impure inline_ref {
+    ;
+    var (($params'bounce, $params'to, $params'value, $params'mode, $params'body, $params'code, $params'data)) = $params;
+    builder $b = begin_cell();
+    $b = store_int($b, 1, 2);
+    $b = __tact_store_bool($b, $params'bounce);
+    $b = store_int($b, 0, 3);
+    $b = __tact_store_address($b, $params'to);
+    $b = store_coins($b, $params'value);
+    $b = store_int($b, 0, ((((1 + 4) + 4) + 64) + 32));
+    if (( ((~ null?($params'code))) ? (true) : ((~ null?($params'data))) )) {
+        $b = __tact_store_bool($b, true);
+        builder $bc = begin_cell();
+        $bc = __tact_store_bool($bc, false);
+        $bc = __tact_store_bool($bc, false);
+        if ((~ null?($params'code))) {
+            $bc = __tact_store_bool($bc, true);
+            $bc = store_ref($bc, __tact_not_null($params'code));
+        } else {
+            $bc = __tact_store_bool($bc, false);
+        }
+        if ((~ null?($params'data))) {
+            $bc = __tact_store_bool($bc, true);
+            $bc = store_ref($bc, __tact_not_null($params'data));
+        } else {
+            $bc = __tact_store_bool($bc, false);
+        }
+        $bc = __tact_store_bool($bc, false);
+        $b = __tact_store_bool($b, true);
+        $b = store_ref($b, end_cell($bc));
+    } elseif (context::op == op::return_request) {
+        $b = __tact_store_bool($b, false);
+    } else {
+        $b = __tact_store_bool($b, false);
+    }
+    cell $body = $params'body;
+    if ((~ null?($body))) {
+        $b = __tact_store_bool($b, true);
+        $b = store_ref($b, __tact_not_null($body));
+    } else {
+        $b = __tact_store_bool($b, false);
+    }
+    cell $c = end_cell($b);
+    send_raw_message($c, $params'mode);
+}
+
+((int, int), ()) $CounterContract$_fun_forward((int, int) $self, slice $to, cell $body, int $bounce, tuple $init) impure inline_ref {
+    var (($self'id, $self'val)) = $self;
+    var ($init) = $init;
+    cell $code = null();
+    cell $data = null();
+    if ((~ null?($init))) {
+        var ($init2'code, $init2'data) = $StateInit$_not_null($init);
+        $code = $init2'code;
+        $data = $init2'data;
+    }
+    if ((0 > 0)) {
+        var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+        int $balance = __tact_my_balance();
+        int $balanceBeforeMessage = ($balance - $ctx'value);
+        if (($balanceBeforeMessage < 0)) {
+            raw_reserve(0, 0);
+            $global_send($SendParameters$_constructor_bounce_to_value_mode_body_code_data($bounce, $to, 0, (128 + 2), $body, $code, $data));
+            return (($self'id, $self'val), ());
+        }
+    }
+    $global_send($SendParameters$_constructor_bounce_to_value_mode_body_code_data($bounce, $to, 0, (64 + 2), $body, $code, $data));
+    return (($self'id, $self'val), ());
+}
+
+((int, int), ()) $CounterContract$_fun_notify((int, int) $self, cell $body) impure inline {
+    var (($self'id, $self'val)) = $self;
+    ($self'id, $self'val)~$CounterContract$_fun_forward(__tact_context_get_sender(), $body, false, null());
+    return (($self'id, $self'val), ());
+}
+
+forall X -> X __tact_not_null(X x) inline {
+    throw_if(128, null?(x)); return x;
+}
+
+forall X0, X1 -> (X0, X1) __tact_tuple_destroy_2(tuple v) asm "2 UNTUPLE";
+
+(cell, ()) ~set_token_snake_metadata_entry(cell content_dict, int key, slice value) impure {
+    content_dict~udict_set_ref(256, key, begin_cell().store_uint(0, 8).store_slice(value).end_cell());
+    return (content_dict, ());
+}
+
+() enforce_that_store_header_compat_has_method_id_41() impure asm """
+	user::upgrade::store_header_compat 41 <>
+    abort" user::upgrade::store_header_compat method ID must be equal to 41"
+""";

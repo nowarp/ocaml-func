@@ -1,0 +1,10 @@
+(test
+ (name func_test)
+ (libraries
+   core
+   alcotest
+   ocaml-func.func)
+ (modules func_test))
+
+(env (dev (flags (:standard -warn-error -A)))
+ (release (ocamlopt_flags :standard -ccopt -static)))

@@ -1,0 +1,22 @@
+(library
+ (name Func)
+ (public_name ocaml-func.func)
+ (libraries ocaml-func.istd)
+ (modules ast ast_raw ast_common unfunc parser lexer func)
+ (preprocess
+  (pps ppx_deriving.show)))
+
+(menhir
+ (modules parser)
+ (flags ("--dump" "--explain")))
+ ; (flags ("--dump" "--explain" "--trace")))
+
+(ocamllex
+ (modules lexer))
+
+(env
+ (dev
+  (flags
+   (:standard -warn-error -A)))
+ (release
+  (ocamlopt_flags :standard -ccopt -static)))
